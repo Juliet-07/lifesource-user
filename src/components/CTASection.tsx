@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const CTASection = () => {
   return (
@@ -14,11 +15,11 @@ const CTASection = () => {
           Every drop counts. Join thousands of donors and recipients building a healthier, more connected community.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="bg-card text-primary hover:bg-card/90 font-heading font-semibold text-base px-8">
-            Become a Donor
+          <Button size="lg" className="bg-card text-primary hover:bg-card/90 font-heading font-semibold text-base px-8" asChild>
+            <Link to="/donate">Become a Donor</Link>
           </Button>
-          <Button size="lg" className="border-2 border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 font-heading font-semibold text-base px-8">
-            Request Blood
+          <Button size="lg" className="border-2 border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 font-heading font-semibold text-base px-8" asChild>
+            <Link to="/request-blood">Request Blood</Link>
           </Button>
         </div>
       </div>
