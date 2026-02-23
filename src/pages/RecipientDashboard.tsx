@@ -1,8 +1,24 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Droplets, MapPin, Clock, Users, ArrowLeft, LogOut, CheckCircle2, Circle, Loader2 } from "lucide-react";
+import {
+  Droplets, MapPin, Clock, Users, ArrowLeft, LogOut, CheckCircle2, Circle, Loader2,
+  Bell, User, PlusCircle
+} from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+
+const mockNotifications = [
+  { id: 1, message: "A donor has accepted your request!", time: "18 min ago", read: false },
+  { id: 2, message: "3 eligible donors notified nearby", time: "1 hour ago", read: false },
+  { id: 3, message: "Your blood request has been created", time: "1 hour ago", read: true },
+];
 
 const request = {
   bloodGroup: "B-",
@@ -22,7 +38,13 @@ const timeline = [
   { label: "Blood received", done: false, time: null },
 ];
 
-const currentStep = 2; // 0-indexed, "Donor accepted" is current
+const currentStep = 2;
+
+const pastRequests = [
+  { id: "REQ-001", bloodGroup: "B-", units: 2, hospital: "LUTH", urgency: "critical", status: "in_progress", date: "2026-02-22" },
+  { id: "REQ-002", bloodGroup: "B-", units: 1, hospital: "St. Nicholas Hospital", urgency: "urgent", status: "completed", date: "2026-01-10" },
+  { id: "REQ-003", bloodGroup: "O+", units: 3, hospital: "Reddington Hospital", urgency: "standard", status: "cancelled", date: "2025-12-05" },
+];
 
 const urgencyLabel: Record<string, string> = {
   critical: "🔴 Critical",
@@ -30,20 +52,66 @@ const urgencyLabel: Record<string, string> = {
   standard: "🟢 Standard",
 };
 
+const statusColor: Record<string, string> = {
+  in_progress: "bg-accent/15 text-accent border-accent/30",
+  completed: "bg-primary/15 text-primary border-primary/30",
+  cancelled: "bg-muted text-muted-foreground",
+  pending: "bg-secondary text-secondary-foreground",
+};
+
 const RecipientDashboard = () => {
+  const [notifications, setNotifications] = useState(mockNotifications);
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const markAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Header */}
       <header className="bg-background border-b border-border/50 sticky top-0 z-40">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-            Home
+            <ArrowLeft className="w-4 h-4" /> Home
           </Link>
           <h1 className="font-heading font-semibold text-lg">Recipient Dashboard</h1>
-          <Button variant="ghost" size="sm" className="text-muted-foreground">
-            <LogOut className="w-4 h-4 mr-1" /> Sign Out
-          </Button>
+          <div className="flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="w-4 h-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <div className="flex items-center justify-between px-3 py-2">
+                  <span className="font-heading font-semibold text-sm">Notifications</span>
+                  {unreadCount > 0 && (
+                    <button className="text-xs text-primary hover:underline" onClick={markAllRead}>Mark all read</button>
+                  )}
+                </div>
+                <DropdownMenuSeparator />
+                {notifications.map((n) => (
+                  <DropdownMenuItem key={n.id} className={`flex flex-col items-start gap-0.5 px-3 py-2 ${!n.read ? "bg-primary/5" : ""}`}>
+                    <span className="text-sm">{n.message}</span>
+                    <span className="text-xs text-muted-foreground">{n.time}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/recipient-profile"><User className="w-4 h-4" /></Link>
+            </Button>
+
+            <Button variant="ghost" size="sm" className="text-muted-foreground" asChild>
+              <Link to="/login"><LogOut className="w-4 h-4 mr-1" /> Sign Out</Link>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -86,6 +154,11 @@ const RecipientDashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* New Request Button */}
+        <Button variant="warm" asChild>
+          <Link to="/recipient-new-request"><PlusCircle className="w-4 h-4 mr-1" /> New Blood Request</Link>
+        </Button>
 
         {/* Donor Availability Summary */}
         <Card className="border-border/50 shadow-soft">
@@ -148,6 +221,43 @@ const RecipientDashboard = () => {
           </Card>
         </section>
 
+        {/* Requests Table */}
+        <section>
+          <h3 className="font-heading font-semibold text-lg mb-3">My Requests</h3>
+          <Card className="border-border/50 shadow-soft overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Blood</TableHead>
+                  <TableHead>Units</TableHead>
+                  <TableHead className="hidden sm:table-cell">Hospital</TableHead>
+                  <TableHead>Urgency</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="hidden sm:table-cell">Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pastRequests.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-mono text-xs">{r.id}</TableCell>
+                    <TableCell className="font-heading font-bold text-destructive">{r.bloodGroup}</TableCell>
+                    <TableCell>{r.units}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-muted-foreground text-sm">{r.hospital}</TableCell>
+                    <TableCell><span className="text-xs">{urgencyLabel[r.urgency]}</span></TableCell>
+                    <TableCell>
+                      <Badge className={`${statusColor[r.status]} text-xs capitalize`}>
+                        {r.status.replace("_", " ")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-muted-foreground text-sm">{r.date}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </section>
+
         {/* Simple Map Placeholder */}
         <section>
           <h3 className="font-heading font-semibold text-lg mb-3">Nearby Donors</h3>
@@ -159,11 +269,9 @@ const RecipientDashboard = () => {
                   <p className="text-sm font-medium">Map View</p>
                   <p className="text-xs">3 anonymous donors nearby</p>
                 </div>
-                {/* Mock donor pins */}
-                <div className="absolute top-12 left-1/4 w-3 h-3 rounded-full bg-primary animate-pulse-gentle" title="Anonymous Donor" />
-                <div className="absolute top-20 right-1/3 w-3 h-3 rounded-full bg-primary animate-pulse-gentle" title="Anonymous Donor" />
-                <div className="absolute bottom-16 left-1/2 w-3 h-3 rounded-full bg-primary animate-pulse-gentle" title="Anonymous Donor" />
-                {/* Hospital pin */}
+                <div className="absolute top-12 left-1/4 w-3 h-3 rounded-full bg-primary animate-pulse" title="Anonymous Donor" />
+                <div className="absolute top-20 right-1/3 w-3 h-3 rounded-full bg-primary animate-pulse" title="Anonymous Donor" />
+                <div className="absolute bottom-16 left-1/2 w-3 h-3 rounded-full bg-primary animate-pulse" title="Anonymous Donor" />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-destructive border-2 border-background" title="Hospital" />
               </div>
             </CardContent>

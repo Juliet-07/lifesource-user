@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import logo from "@/assets/logo.svg";
@@ -20,7 +21,8 @@ const Navbar = () => {
           <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Features</a>
           <a href="#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
           <a href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">For Hospitals</a>
-          <Button variant="hero" size="sm">Get Started</Button>
+          <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Login</Link>
+          <Button variant="hero" size="sm" asChild><Link to="/donate">Get Started</Link></Button>
         </div>
 
         {/* Mobile toggle */}
