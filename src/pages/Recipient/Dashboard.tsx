@@ -117,7 +117,7 @@ const RecipientDashboard = () => {
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" /> Home
           </Link>
-          <h1 className="font-heading font-semibold text-lg">Recipient Dashboard</h1>
+          <h1 className="font-heading font-semibold text-lg hidden md:inline-block">Recipient Dashboard</h1>
           <div className="flex items-center gap-1">
             {/* Notifications */}
             <DropdownMenu>
