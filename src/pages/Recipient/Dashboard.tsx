@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -60,11 +62,61 @@ const statusColor: Record<string, string> = {
 };
 
 const RecipientDashboard = () => {
+  const apiURL = import.meta.env.VITE_REACT_APP_BASE_URL;
+  const token = localStorage.getItem("userToken");
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState(mockNotifications);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const markAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  const getMyProfile = async () => {
+    const res = await axios.get(`${apiURL}/recipient/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(res.data, "profile");
+    return res.data.data;
+  };
+  // const getNotifications = async () => {
+  //   const { data } = await axios.get(`${apiURL}/recipient/notifications`, {
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //       "Content-type": "application/json; charset=UTF-8",
+  //     },
+  //   });
+  //   console.log(data);
+  //   return data.data.notifications;
+  // };
+  const getMyRequests = async () => {
+    const { data } = await axios.get(`${apiURL}/requests`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    });
+    console.log(data);
+    return data.data.requests;
+  };
+  const { data: userData } = useQuery({
+    queryKey: ["my-profile"],
+    queryFn: getMyProfile,
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: requests = [] } = useQuery<Request[]>({
+    queryKey: ["my-requests"],
+    queryFn: getMyRequests,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const handleLogout = () => {
+    localStorage.removeItem("userToken");
+    navigate("/");
   };
 
   return (
@@ -108,7 +160,7 @@ const RecipientDashboard = () => {
               <Link to="/recipient-profile"><User className="w-4 h-4" /></Link>
             </Button>
 
-            <Button variant="ghost" size="sm" className="text-muted-foreground" asChild>
+            <Button onClick={handleLogout} variant="ghost" size="sm" className="text-muted-foreground" asChild>
               <Link to="/login"><LogOut className="w-4 h-4 mr-1" /> Sign Out</Link>
             </Button>
           </div>
@@ -259,7 +311,7 @@ const RecipientDashboard = () => {
         </section>
 
         {/* Simple Map Placeholder */}
-        <section>
+        {/* <section>
           <h3 className="font-heading font-semibold text-lg mb-3">Nearby Donors</h3>
           <Card className="border-border/50 shadow-soft overflow-hidden">
             <CardContent className="p-0">
@@ -276,7 +328,7 @@ const RecipientDashboard = () => {
               </div>
             </CardContent>
           </Card>
-        </section>
+        </section> */}
       </main>
     </div>
   );

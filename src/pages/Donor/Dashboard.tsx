@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +50,21 @@ const urgencyColor: Record<string, string> = {
   standard: "bg-secondary text-secondary-foreground",
 };
 
+type Request = {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  parentEmail: string;
+  grade: string;
+  age: string;
+  image: string;
+};
+
 const DonorDashboard = () => {
+  const apiURL = import.meta.env.VITE_REACT_APP_BASE_URL;
+  const token = localStorage.getItem("userToken");
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [deferOpen, setDeferOpen] = useState(false);
   const [deferReason, setDeferReason] = useState("");
@@ -76,6 +92,43 @@ const DonorDashboard = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
+  const getMyProfile = async () => {
+    const res = await axios.get(`${apiURL}/donor/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(res.data, "profile");
+    return res.data.data;
+  };
+  const getMyRequests = async () => {
+    const { data } = await axios.get(`${apiURL}/donor/notifications`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    });
+    console.log(data);
+    return data.data.notifications;
+  };
+  const { data: userData } = useQuery({
+    queryKey: ["my-profile"],
+    queryFn: getMyProfile,
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: requests = [] } = useQuery<Request[]>({
+    queryKey: ["requests"],
+    queryFn: getMyRequests,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const handleLogout = () => {
+    localStorage.removeItem("userToken");
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
@@ -84,7 +137,7 @@ const DonorDashboard = () => {
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" /> Home
           </Link>
-          <h1 className="font-heading font-semibold text-lg">Donor Dashboard</h1>
+          <h1 className="font-heading font-semibold text-lg hidden md:inline-block">Donor Dashboard</h1>
           <div className="flex items-center gap-1">
             {/* Notifications */}
             <DropdownMenu>
@@ -121,7 +174,7 @@ const DonorDashboard = () => {
             </Button>
 
             {/* Sign Out */}
-            <Button variant="ghost" size="sm" className="text-muted-foreground" asChild>
+            <Button onClick={handleLogout} variant="ghost" size="sm" className="text-muted-foreground" asChild>
               <Link to="/login"><LogOut className="w-4 h-4 mr-1" /> Sign Out</Link>
             </Button>
           </div>
@@ -131,7 +184,7 @@ const DonorDashboard = () => {
       <main className="container mx-auto px-4 py-8 space-y-6 max-w-4xl">
         {/* Eligibility Card */}
         <Card className="border-border/50 shadow-soft overflow-hidden">
-          <div className={`h-1.5 w-full ${donorProfile.eligible ? "gradient-teal" : "bg-destructive"}`} />
+          <div className={`h-1.5 w-full ${userData?.isEligible === true ? "gradient-teal" : "bg-destructive"}`} />
           <CardContent className="pt-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
@@ -139,12 +192,12 @@ const DonorDashboard = () => {
                   <Heart className="w-7 h-7 text-primary-foreground" />
                 </div>
                 <div>
-                  <h2 className="font-heading font-semibold text-xl">{donorProfile.name}</h2>
-                  <p className="text-muted-foreground text-sm">Blood Group: <strong className="text-foreground">{donorProfile.bloodGroup}</strong></p>
+                  <h2 className="font-heading font-semibold text-xl">{userData?.name}</h2>
+                  <p className="text-muted-foreground text-sm">Blood Group: <strong className="text-foreground">{userData?.bloodType}</strong></p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {donorProfile.eligible ? (
+                {userData?.isEligible === true ? (
                   <Badge className="bg-primary/15 text-primary border-primary/30 gap-1">
                     <ShieldCheck className="w-3.5 h-3.5" /> Eligible to Donate
                   </Badge>

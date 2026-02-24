@@ -20,7 +20,7 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Features</a>
           <a href="#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
-          <a href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">For Hospitals</a>
+          {/* <a href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">For Hospitals</a> */}
           <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Login</Link>
           <Button variant="hero" size="sm" asChild><Link to="/donate">Get Started</Link></Button>
         </div>
@@ -36,7 +36,7 @@ const Navbar = () => {
         <div className="md:hidden bg-background border-b border-border px-4 pb-4 space-y-3">
           <a href="#features" className="block text-sm font-medium text-muted-foreground hover:text-foreground">Features</a>
           <a href="#how-it-works" className="block text-sm font-medium text-muted-foreground hover:text-foreground">How It Works</a>
-          <a href="#" className="block text-sm font-medium text-muted-foreground hover:text-foreground">For Hospitals</a>
+          {/* <a href="#" className="block text-sm font-medium text-muted-foreground hover:text-foreground">For Hospitals</a> */}
           <Button variant="hero" size="sm" className="w-full">Get Started</Button>
         </div>
       )}

@@ -5,15 +5,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
-import DonorRegistration from "./pages/DonorRegistration";
-import DonorDashboard from "./pages/DonorDashboard";
-import DonorProfile from "./pages/DonorProfile";
-import DonorLogDonation from "./pages/DonorLogDonation";
-import RecipientRequest from "./pages/RecipientRequest";
-import RecipientDashboard from "./pages/RecipientDashboard";
-import RecipientProfile from "./pages/RecipientProfile";
-import RecipientNewRequest from "./pages/RecipientNewRequest";
+import DonorRegistration from "./pages/Donor/Registration";
+import DonorDashboard from "./pages/Donor/Dashboard";
+import DonorProfile from "./pages/Donor/Profile";
+import DonorLogDonation from "./pages/Donor/LogDonation";
+import RecipientRequest from "./pages/Recipient/Registeration";
+import RecipientDashboard from "./pages/Recipient/Dashboard";
+import RecipientProfile from "./pages/Recipient/Profile";
+import RecipientNewRequest from "./pages/Recipient/NewRequest";
 import NotFound from "./pages/NotFound";
+import RecipientRegisteration from "./pages/Recipient/Registeration";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,7 @@ const App = () => (
           <Route path="/donor-dashboard" element={<DonorDashboard />} />
           <Route path="/donor-profile" element={<DonorProfile />} />
           <Route path="/donor-log-donation" element={<DonorLogDonation />} />
-          <Route path="/request-blood" element={<RecipientRequest />} />
+          <Route path="/request-blood" element={<RecipientRegisteration />} />
           <Route path="/recipient-dashboard" element={<RecipientDashboard />} />
           <Route path="/recipient-profile" element={<RecipientProfile />} />
           <Route path="/recipient-new-request" element={<RecipientNewRequest />} />
