@@ -13,6 +13,7 @@ import RecipientRequest from "./pages/Recipient/Registeration";
 import RecipientDashboard from "./pages/Recipient/Dashboard";
 import RecipientProfile from "./pages/Recipient/Profile";
 import RecipientNewRequest from "./pages/Recipient/NewRequest";
+import RecipientRequestDetail from "./pages/Recipient/RequestDetail";
 import NotFound from "./pages/NotFound";
 import RecipientRegisteration from "./pages/Recipient/Registeration";
 
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/recipient-dashboard" element={<RecipientDashboard />} />
           <Route path="/recipient-profile" element={<RecipientProfile />} />
           <Route path="/recipient-new-request" element={<RecipientNewRequest />} />
+          <Route path="/recipient-request/:id" element={<RecipientRequestDetail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
