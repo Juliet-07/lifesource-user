@@ -10,13 +10,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Droplets, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { HospitalDropdown } from "@/components/Dropdown";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const donationTypes = [
   { value: "whole_blood", label: "Whole Blood" },
   { value: "plasma", label: "Plasma" },
-  { value: "platelets", label: "Platelets" },
-  { value: "red_cells", label: "Red Cells" },
+  { value: "platelet", label: "Platelets" },
+  { value: "double_red_cells", label: "Red Cells" },
 ];
 const urgencyLevels = [
   { value: "critical", label: "🔴 Critical – Needed Now" },
@@ -31,6 +32,8 @@ const RecipientNewRequest = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [hospitalId, setHospitalId] = useState("")
+  const [selectedHospital, setSelectedHospital] = useState("")
 
   const { data: profile } = useQuery({
     queryKey: ["recipient-profile"],
@@ -46,15 +49,14 @@ const RecipientNewRequest = () => {
 
   const [form, setForm] = useState({
     bloodType: "",
-    donationType: "whole_blood",
-    unitsNeeded: "1",
+    donationType: "",
+    unitsNeeded: "",
     urgency: "",
     patientName: "",
     patientAge: "",
     medicalCondition: "",
     requiredBy: "",
     notes: "",
-    hospitalId: "",
     hospitalName: "",
     longitude: "",
     latitude: "",
@@ -88,11 +90,11 @@ const RecipientNewRequest = () => {
         medicalCondition: form.medicalCondition,
         requiredBy: form.requiredBy,
         notes: form.notes,
-        hospitalId: form.hospitalId,
-        hospitalName: form.hospitalName,
-        longitude: form.longitude ? Number(form.longitude) : 0,
-        latitude: form.latitude ? Number(form.latitude) : 0,
-        city: form.city,
+        hospitalId: hospitalId,
+        // hospitalName: form.hospitalName,
+        // longitude: form.longitude ? Number(form.longitude) : 0,
+        // latitude: form.latitude ? Number(form.latitude) : 0,
+        // city: form.city,
       };
       const { data } = await axios.post(`${apiURL}/requests`, payload, {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -119,7 +121,7 @@ const RecipientNewRequest = () => {
   };
 
   const update = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
-  const isValid = form.bloodType && form.hospitalName && form.urgency && form.unitsNeeded;
+  const isValid = form.bloodType && form.urgency && form.unitsNeeded;
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -191,23 +193,27 @@ const RecipientNewRequest = () => {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label>Hospital Name *</Label>
-                <Input value={form.hospitalName} onChange={(e) => update("hospitalName", e.target.value)} required />
-              </div>
+              <HospitalDropdown
+                value={hospitalId}
+                onChange={(name, id) => {
+                  setSelectedHospital(name);
+                  setHospitalId(id);
+                }}
+              />
+
 
               <div className="space-y-2">
                 <Label>Required By <span className="text-muted-foreground text-xs">(date)</span></Label>
                 <Input type="date" value={form.requiredBy} onChange={(e) => update("requiredBy", e.target.value)} />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>City</Label>
                 <Input value={form.city} onChange={(e) => update("city", e.target.value)} />
-              </div>
+              </div> */}
 
               <div className="space-y-2">
-                <Label>Medical Condition <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                <Label>Medical Condition </Label>
                 <Textarea
                   placeholder="e.g. Surgery scheduled, sickle cell crisis…"
                   value={form.medicalCondition}
@@ -216,7 +222,7 @@ const RecipientNewRequest = () => {
                 />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>Notes <span className="text-muted-foreground text-xs">(optional)</span></Label>
                 <Textarea
                   placeholder="Any additional information…"
@@ -224,7 +230,7 @@ const RecipientNewRequest = () => {
                   onChange={(e) => update("notes", e.target.value)}
                   rows={2}
                 />
-              </div>
+              </div> */}
 
               <Button type="submit" variant="warm" size="lg" className="w-full mt-2" disabled={!isValid || submitMutation.isPending}>
                 {submitMutation.isPending ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Submitting…</> : "Submit Request"}

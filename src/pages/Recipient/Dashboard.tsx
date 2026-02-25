@@ -29,7 +29,7 @@ const statusColor: Record<string, string> = {
   active: "bg-accent/15 text-accent border-accent/30",
   completed: "bg-primary/15 text-primary border-primary/30",
   fulfilled: "bg-primary/15 text-primary border-primary/30",
-  cancelled: "bg-muted text-muted-foreground",
+  cancelled: "bg-red-600/75 text-white",
   pending: "bg-secondary text-secondary-foreground",
 };
 
