@@ -29,8 +29,8 @@ interface RegistrationForm {
   city: string;
   state: string;
   country: string;
-  longitude: number;
-  latitude: number;
+  // longitude: number;
+  // latitude: number;
   consentGiven: boolean;
   age: number;
   weight: number;
@@ -56,8 +56,8 @@ const DonorRegistration = () => {
     city: "",
     state: "",
     country: "",
-    latitude: 0,
-    longitude: 0,
+    // latitude: 0,
+    // longitude: 0,
     consentGiven: false,
     preferredDonationType: "",
     weight: 0,
