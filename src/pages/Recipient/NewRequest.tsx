@@ -104,7 +104,7 @@ const RecipientNewRequest = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recipient-requests"] });
       toast({ title: "Request submitted", description: "Nearby donors will be notified." });
-      navigate("/recipient-dashboard");
+      navigate("/dashboard");
     },
     onError: (error: any) => {
       toast({
