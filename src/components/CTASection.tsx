@@ -16,10 +16,10 @@ const CTASection = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button size="lg" className="bg-card text-primary hover:bg-card/90 font-heading font-semibold text-base px-8" asChild>
-            <Link to="/donate">Become a Donor</Link>
+            <Link to="/register">Join LifeSource</Link>
           </Button>
           <Button size="lg" className="border-2 border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 font-heading font-semibold text-base px-8" asChild>
-            <Link to="/request-blood">Request Blood</Link>
+            <Link to="/login">Sign In</Link>
           </Button>
         </div>
       </div>

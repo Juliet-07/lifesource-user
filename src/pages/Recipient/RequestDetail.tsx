@@ -49,7 +49,7 @@ const RecipientRequestDetail = () => {
       queryClient.invalidateQueries({ queryKey: ["recipient-requests"] });
       queryClient.invalidateQueries({ queryKey: ["request-status", id] });
       toast({ title: "Request cancelled" });
-      navigate("/recipient-dashboard");
+      navigate("/dashboard");
     },
     onError: (error: any) => {
       toast({
@@ -68,7 +68,7 @@ const RecipientRequestDetail = () => {
     <div className="min-h-screen bg-muted/30">
       <header className="bg-background border-b border-border/50 sticky top-0 z-40">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/recipient-dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" /> Dashboard
           </Link>
           <h1 className="font-heading font-semibold text-lg">Request Details</h1>

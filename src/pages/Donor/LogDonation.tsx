@@ -25,14 +25,14 @@ const DonorLogDonation = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast({ title: "Donation logged!", description: "Thank you for saving a life 🩸" });
-    navigate("/donor-dashboard");
+    navigate("/dashboard");
   };
 
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="bg-background border-b border-border/50 sticky top-0 z-40">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/donor-dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" /> Dashboard
           </Link>
           <h1 className="font-heading font-semibold text-lg">Log Donation</h1>

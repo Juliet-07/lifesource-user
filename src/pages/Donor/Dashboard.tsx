@@ -7,41 +7,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Heart, CalendarDays, MapPin, Clock, CheckCircle2, XCircle, ArrowLeft, LogOut,
-  Bell, User, PlusCircle, AlertTriangle, ShieldCheck
+  Heart, CalendarDays, MapPin, Clock, CheckCircle2, XCircle,
+  PlusCircle, AlertTriangle, ShieldCheck
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-
-const donorProfile = {
-  name: "Sarah Johnson",
-  bloodGroup: "O+",
-  eligible: true,
-  lastDonation: "2025-12-10",
-  nextEligible: "2026-01-24",
-};
+import { useAuth } from "@/contexts/AuthContext";
+import DashboardHeader from "@/components/DashboardHeader";
 
 const nearbyRequests = [
   { id: 1, bloodGroup: "O+", distance: "2.3 km", hospital: "Lagos University Teaching Hospital", urgency: "critical" },
   { id: 2, bloodGroup: "O+", distance: "5.1 km", hospital: "St. Nicholas Hospital", urgency: "urgent" },
   { id: 3, bloodGroup: "O-", distance: "8.7 km", hospital: "Reddington Hospital", urgency: "standard" },
-];
-
-const donationHistory = [
-  { date: "2025-12-10", hospital: "Lagos University Teaching Hospital", bloodGroup: "O+" },
-  { date: "2025-09-05", hospital: "St. Nicholas Hospital", bloodGroup: "O+" },
-  { date: "2025-05-22", hospital: "Reddington Hospital", bloodGroup: "O+" },
-];
-
-const mockNotifications = [
-  { id: 1, message: "Urgent request for O+ blood at LUTH", time: "5 min ago", read: false },
-  { id: 2, message: "Your donation eligibility is restored!", time: "2 days ago", read: false },
-  { id: 3, message: "Thank you for your last donation 🩸", time: "1 week ago", read: true },
 ];
 
 const urgencyColor: Record<string, string> = {
@@ -50,31 +29,45 @@ const urgencyColor: Record<string, string> = {
   standard: "bg-secondary text-secondary-foreground",
 };
 
-type Request = {
+interface Notification {
   _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  parentEmail: string;
-  grade: string;
-  age: string;
-  image: string;
-};
+  message: string;
+  createdAt: string;
+  read: boolean;
+}
 
 const DonorDashboard = () => {
   const apiURL = import.meta.env.VITE_REACT_APP_BASE_URL;
-  const token = localStorage.getItem("userToken");
-  const navigate = useNavigate();
+  const { token } = useAuth();
   const { toast } = useToast();
   const [deferOpen, setDeferOpen] = useState(false);
   const [deferReason, setDeferReason] = useState("");
   const [deferRequestId, setDeferRequestId] = useState<number | null>(null);
-  const [notifications, setNotifications] = useState(mockNotifications);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+
+  const { data: userData } = useQuery({
+    queryKey: ["donor-profile"],
+    queryFn: async () => {
+      const { data } = await axios.get(`${apiURL}/donor/profile`, { headers });
+      return data.data;
+    },
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: notifications = [] } = useQuery<Notification[]>({
+    queryKey: ["donor-notifications"],
+    queryFn: async () => {
+      const { data } = await axios.get(`${apiURL}/donor/notifications`, { headers });
+      return data.data.notifications ?? data.data ?? [];
+    },
+    enabled: !!token,
+    staleTime: 30 * 1000,
+  });
 
   const handleAccept = (id: number) => {
-    toast({ title: "Request accepted!", description: "Please proceed to the hospital. Directions will be shared shortly." });
+    toast({ title: "Request accepted!", description: "Please proceed to the hospital." });
   };
 
   const openDefer = (id: number) => {
@@ -85,101 +78,12 @@ const DonorDashboard = () => {
 
   const submitDefer = () => {
     setDeferOpen(false);
-    toast({ title: "Request deferred", description: "Your reason has been noted. Thank you." });
-  };
-
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
-  const getMyProfile = async () => {
-    const res = await axios.get(`${apiURL}/donor/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(res.data, "profile");
-    return res.data.data;
-  };
-  const getMyRequests = async () => {
-    const { data } = await axios.get(`${apiURL}/donor/notifications`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-type": "application/json; charset=UTF-8",
-      },
-    });
-    console.log(data);
-    return data.data.notifications;
-  };
-  const { data: userData } = useQuery({
-    queryKey: ["my-profile"],
-    queryFn: getMyProfile,
-    enabled: !!token,
-    staleTime: 5 * 60 * 1000,
-  });
-  const { data: requests = [] } = useQuery<Request[]>({
-    queryKey: ["requests"],
-    queryFn: getMyRequests,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const handleLogout = () => {
-    localStorage.removeItem("userToken");
-    navigate("/");
+    toast({ title: "Request deferred", description: "Your reason has been noted." });
   };
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="bg-background border-b border-border/50 sticky top-0 z-40">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Home
-          </Link>
-          <h1 className="font-heading font-semibold text-lg hidden md:inline-block">Donor Dashboard</h1>
-          <div className="flex items-center gap-1">
-            {/* Notifications */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="w-4 h-4" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <div className="flex items-center justify-between px-3 py-2">
-                  <span className="font-heading font-semibold text-sm">Notifications</span>
-                  {unreadCount > 0 && (
-                    <button className="text-xs text-primary hover:underline" onClick={markAllRead}>Mark all read</button>
-                  )}
-                </div>
-                <DropdownMenuSeparator />
-                {notifications.map((n) => (
-                  <DropdownMenuItem key={n.id} className={`flex flex-col items-start gap-0.5 px-3 py-2 ${!n.read ? "bg-primary/5" : ""}`}>
-                    <span className="text-sm">{n.message}</span>
-                    <span className="text-xs text-muted-foreground">{n.time}</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Profile */}
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/donor-profile"><User className="w-4 h-4" /></Link>
-            </Button>
-
-            {/* Sign Out */}
-            <Button onClick={handleLogout} variant="ghost" size="sm" className="text-muted-foreground" asChild>
-              <Link to="/login"><LogOut className="w-4 h-4 mr-1" /> Sign Out</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader notifications={notifications} />
 
       <main className="container mx-auto px-4 py-8 space-y-6 max-w-4xl">
         {/* Eligibility Card */}
@@ -192,7 +96,7 @@ const DonorDashboard = () => {
                   <Heart className="w-7 h-7 text-primary-foreground" />
                 </div>
                 <div>
-                  <h2 className="font-heading font-semibold text-xl">{userData?.name}</h2>
+                  <h2 className="font-heading font-semibold text-xl">{userData?.name ?? `${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`.trim()}</h2>
                   <p className="text-muted-foreground text-sm">Blood Group: <strong className="text-foreground">{userData?.bloodType}</strong></p>
                 </div>
               </div>
@@ -203,14 +107,18 @@ const DonorDashboard = () => {
                   </Badge>
                 ) : (
                   <Badge className={`${urgencyColor.critical} gap-1`}>
-                    <AlertTriangle className="w-3.5 h-3.5" /> Not eligible until {donorProfile.nextEligible}
+                    <AlertTriangle className="w-3.5 h-3.5" /> Not Eligible
                   </Badge>
                 )}
               </div>
             </div>
             <div className="mt-4 flex flex-wrap gap-6 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1.5"><CalendarDays className="w-4 h-4" /> Last donation: {donorProfile.lastDonation}</span>
-              <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Next eligible: {donorProfile.nextEligible}</span>
+              {userData?.lastDonation && (
+                <span className="flex items-center gap-1.5"><CalendarDays className="w-4 h-4" /> Last donation: {userData.lastDonation}</span>
+              )}
+              {userData?.nextEligible && (
+                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Next eligible: {userData.nextEligible}</span>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -254,27 +162,6 @@ const DonorDashboard = () => {
             ))}
           </div>
         </section>
-
-        {/* Donation History */}
-        <section>
-          <h3 className="font-heading font-semibold text-lg mb-3">Donation History</h3>
-          <Card className="border-border/50 shadow-soft">
-            <CardContent className="py-2">
-              <div className="divide-y divide-border">
-                {donationHistory.map((d, i) => (
-                  <div key={i} className="py-3 flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-3">
-                      <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                      <span>{d.date}</span>
-                    </div>
-                    <span className="text-muted-foreground hidden sm:inline">{d.hospital}</span>
-                    <Badge variant="outline" className="text-xs">{d.bloodGroup}</Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </section>
       </main>
 
       {/* Defer Reason Dialog */}
@@ -285,7 +172,7 @@ const DonorDashboard = () => {
             <DialogDescription>Please let us know why you're deferring this request.</DialogDescription>
           </DialogHeader>
           <Textarea
-            placeholder="e.g. I recently donated, I'm feeling unwell, travel constraints…"
+            placeholder="e.g. I recently donated, I'm feeling unwell…"
             value={deferReason}
             onChange={(e) => setDeferReason(e.target.value)}
             rows={4}

@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import logoText from "@/assets/logo-text.svg";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
@@ -20,9 +22,14 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Features</a>
           <a href="#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
-          {/* <a href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">For Hospitals</a> */}
-          <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Login</Link>
-          <Button variant="hero" size="sm" asChild><Link to="/register">Get Started</Link></Button>
+          {isAuthenticated ? (
+            <Button variant="hero" size="sm" asChild><Link to="/dashboard">Dashboard</Link></Button>
+          ) : (
+            <>
+              <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Login</Link>
+              <Button variant="hero" size="sm" asChild><Link to="/register">Get Started</Link></Button>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -36,8 +43,14 @@ const Navbar = () => {
         <div className="md:hidden bg-background border-b border-border px-4 pb-4 space-y-3">
           <a href="#features" className="block text-sm font-medium text-muted-foreground hover:text-foreground">Features</a>
           <a href="#how-it-works" className="block text-sm font-medium text-muted-foreground hover:text-foreground">How It Works</a>
-          {/* <a href="#" className="block text-sm font-medium text-muted-foreground hover:text-foreground">For Hospitals</a> */}
-          <Button variant="hero" size="sm" className="w-full">Get Started</Button>
+          {isAuthenticated ? (
+            <Button variant="hero" size="sm" className="w-full" asChild><Link to="/dashboard">Dashboard</Link></Button>
+          ) : (
+            <>
+              <Link to="/login" className="block text-sm font-medium text-muted-foreground hover:text-foreground">Login</Link>
+              <Button variant="hero" size="sm" className="w-full" asChild><Link to="/register">Get Started</Link></Button>
+            </>
+          )}
         </div>
       )}
     </nav>
