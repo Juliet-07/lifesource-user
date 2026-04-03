@@ -49,7 +49,7 @@ const RecipientRequestDetail = () => {
       queryClient.invalidateQueries({ queryKey: ["recipient-requests"] });
       queryClient.invalidateQueries({ queryKey: ["request-status", id] });
       toast({ title: "Request cancelled" });
-      navigate("/recipient-dashboard");
+      navigate("/dashboard");
     },
     onError: (error: any) => {
       toast({
