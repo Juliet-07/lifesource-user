@@ -25,7 +25,7 @@ const DonorLogDonation = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast({ title: "Donation logged!", description: "Thank you for saving a life 🩸" });
-    navigate("/donor-dashboard");
+    navigate("/dashboard");
   };
 
   return (
