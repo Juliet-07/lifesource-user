@@ -34,11 +34,10 @@ interface RegistrationForm {
   consentGiven: boolean;
   age: number;
   weight: number;
-  role: string;
   preferredDonationType: string;
 }
 
-const DonorRegistration = () => {
+const Registration = () => {
   const apiURL = import.meta.env.VITE_REACT_APP_BASE_URL;
   const navigate = useNavigate();
   const { handleSubmit } = useForm<RegistrationForm>();
@@ -50,7 +49,6 @@ const DonorRegistration = () => {
     lastName: "",
     email: "",
     password: "",
-    role: "donor",
     bloodType: "",
     phone: "",
     city: "",
@@ -339,4 +337,4 @@ const DonorRegistration = () => {
   );
 };
 
-export default DonorRegistration;
+export default Registration;
