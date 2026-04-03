@@ -1,19 +1,15 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Droplets, ArrowLeft, LogOut, Bell, User, PlusCircle, Clock,
-} from "lucide-react";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { Droplets, PlusCircle, Clock } from "lucide-react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { useAuth } from "@/contexts/AuthContext";
+import DashboardHeader from "@/components/DashboardHeader";
 
 const urgencyLabel: Record<string, string> = {
   critical: "🔴 Critical",
@@ -53,57 +49,39 @@ interface BloodRequest {
 
 const RecipientDashboard = () => {
   const apiURL = import.meta.env.VITE_REACT_APP_BASE_URL;
-  const token = localStorage.getItem("userToken");
+  const { token } = useAuth();
   const navigate = useNavigate();
-
-  const getMyProfile = async () => {
-    const { data } = await axios.get(`${apiURL}/recipient/profile`, {
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    });
-    return data.data;
-  };
-
-  const getMyRequests = async () => {
-    const { data } = await axios.get(`${apiURL}/requests`, {
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    });
-    return data.data.requests ?? data.data ?? [];
-  };
-
-  const getNotifications = async () => {
-    const { data } = await axios.get(`${apiURL}/recipient/notifications`, {
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    });
-    return data.data.notifications ?? data.data ?? [];
-  };
+  const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
   const { data: userData } = useQuery({
     queryKey: ["recipient-profile"],
-    queryFn: getMyProfile,
+    queryFn: async () => {
+      const { data } = await axios.get(`${apiURL}/recipient/profile`, { headers });
+      return data.data;
+    },
     enabled: !!token,
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: requests = [], isLoading: requestsLoading } = useQuery<BloodRequest[]>({
     queryKey: ["recipient-requests"],
-    queryFn: getMyRequests,
+    queryFn: async () => {
+      const { data } = await axios.get(`${apiURL}/requests`, { headers });
+      return data.data.requests ?? data.data ?? [];
+    },
     enabled: !!token,
     staleTime: 60 * 1000,
   });
 
   const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ["recipient-notifications"],
-    queryFn: getNotifications,
+    queryFn: async () => {
+      const { data } = await axios.get(`${apiURL}/recipient/notifications`, { headers });
+      return data.data.notifications ?? data.data ?? [];
+    },
     enabled: !!token,
     staleTime: 30 * 1000,
   });
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const handleLogout = () => {
-    localStorage.removeItem("userToken");
-    navigate("/");
-  };
 
   const activeRequest = requests.find(
     (r) => r.status === "active" || r.status === "in_progress" || r.status === "pending"
@@ -111,56 +89,7 @@ const RecipientDashboard = () => {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="bg-background border-b border-border/50 sticky top-0 z-40">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Home
-          </Link>
-          <h1 className="font-heading font-semibold text-lg hidden md:inline-block">Recipient Dashboard</h1>
-          <div className="flex items-center gap-1">
-            {/* Notifications */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="w-4 h-4" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <div className="flex items-center justify-between px-3 py-2">
-                  <span className="font-heading font-semibold text-sm">Notifications</span>
-                </div>
-                <DropdownMenuSeparator />
-                {notifications.length === 0 ? (
-                  <div className="px-3 py-4 text-center text-sm text-muted-foreground">No notifications yet</div>
-                ) : (
-                  notifications.slice(0, 10).map((n) => (
-                    <DropdownMenuItem key={n._id} className={`flex flex-col items-start gap-0.5 px-3 py-2 ${!n.read ? "bg-primary/5" : ""}`}>
-                      <span className="text-sm">{n.message}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(n.createdAt).toLocaleString()}
-                      </span>
-                    </DropdownMenuItem>
-                  ))
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/recipient-profile"><User className="w-4 h-4" /></Link>
-            </Button>
-
-            <Button onClick={handleLogout} variant="ghost" size="sm" className="text-muted-foreground">
-              <LogOut className="w-4 h-4 mr-1" /> Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader notifications={notifications} />
 
       <main className="container mx-auto px-4 py-8 space-y-6 max-w-4xl">
         {/* Welcome */}
@@ -176,7 +105,7 @@ const RecipientDashboard = () => {
           </Button>
         </div>
 
-        {/* Active Request Card (if any) */}
+        {/* Active Request Card */}
         {activeRequest && (
           <Card className="border-border/50 shadow-soft overflow-hidden">
             <div className="h-1.5 w-full gradient-warm" />

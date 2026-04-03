@@ -5,7 +5,6 @@ import heroImage from "@/assets/hero-image.jpg";
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden pt-16">
-      {/* Background image */}
       <div className="absolute inset-0">
         <img src={heroImage} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-foreground/60" />
@@ -27,10 +26,10 @@ const HeroSection = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button variant="warm" size="lg" className="text-base px-8" asChild>
-              <Link to="/donate">Donate Blood</Link>
+              <Link to="/register">Get Started</Link>
             </Button>
             <Button size="lg" className="border-2 border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 font-heading font-semibold text-base px-8" asChild>
-              <Link to="/request-blood">I Need Blood</Link>
+              <Link to="/login">Sign In</Link>
             </Button>
           </div>
           <div className="mt-10 flex items-center gap-6 text-primary-foreground/60 text-sm">
