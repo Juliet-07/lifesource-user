@@ -32,6 +32,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/donor-profile" element={<DonorProfile />} />
             <Route path="/donor-log-donation" element={<DonorLogDonation />} />
+            <Route path="/donor-new-appointment" element={<DonorNewAppointment />} />
             <Route path="/recipient-profile" element={<RecipientProfile />} />
             <Route path="/recipient-new-request" element={<RecipientNewRequest />} />
             <Route path="/recipient-request/:id" element={<RecipientRequestDetail />} />
