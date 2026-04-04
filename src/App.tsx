@@ -10,6 +10,7 @@ import Registration from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import DonorProfile from "./pages/Donor/Profile";
 import DonorLogDonation from "./pages/Donor/LogDonation";
+import DonorNewAppointment from "./pages/Donor/NewAppointment";
 import RecipientProfile from "./pages/Recipient/Profile";
 import RecipientNewRequest from "./pages/Recipient/NewRequest";
 import RecipientRequestDetail from "./pages/Recipient/RequestDetail";
