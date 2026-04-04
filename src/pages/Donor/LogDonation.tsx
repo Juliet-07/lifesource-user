@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { HospitalDropdown } from "@/components/Dropdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Heart } from "lucide-react";
@@ -14,6 +15,8 @@ const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const DonorLogDonation = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [hospitalId, setHospitalId] = useState("")
+  const [selectedHospital, setSelectedHospital] = useState("")
   const [form, setForm] = useState({
     date: new Date().toISOString().split("T")[0],
     hospital: "",
@@ -55,8 +58,13 @@ const DonorLogDonation = () => {
                 <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
               </div>
               <div className="space-y-2">
-                <Label>Hospital / Donation Center *</Label>
-                <Input placeholder="e.g. Lagos University Teaching Hospital" value={form.hospital} onChange={(e) => setForm({ ...form, hospital: e.target.value })} required />
+                <HospitalDropdown
+                  value={hospitalId}
+                  onChange={(name, id) => {
+                    setSelectedHospital(name);
+                    setHospitalId(id);
+                  }}
+                />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">

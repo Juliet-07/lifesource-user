@@ -8,7 +8,7 @@ const token = localStorage.getItem("userToken");
 
 export const HospitalDropdown = ({ value, onChange }) => {
     const fetchHospitals = async () => {
-        const res = await axios.get(`${apiURL}/recipient/hospitals`, {
+        const res = await axios.get(`${apiURL}/hospitals`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
@@ -42,7 +42,7 @@ export const HospitalDropdown = ({ value, onChange }) => {
                 onChange={(selectedOption) => {
                     onChange(selectedOption?.label, selectedOption?.value);
                 }}
-                placeholder="Select any institution (bloodbank or hospital)"
+                placeholder="Select institution (hospital or bloodbank)"
                 className="react-select-container"
                 classNamePrefix="react-select"
             />
