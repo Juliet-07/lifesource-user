@@ -35,12 +35,6 @@ const donationHistory = [
   { id: "d3", date: "2025-08-20", hospital: "Reddington Hospital", bloodGroup: "O+", units: 2, notes: "Emergency request" },
 ];
 
-const appointments = [
-  { id: "a1", date: "2026-04-12", time: "10:00 AM", hospital: "Lagos University Teaching Hospital", status: "confirmed" },
-  { id: "a2", date: "2026-04-18", time: "2:30 PM", hospital: "St. Nicholas Hospital", status: "pending" },
-  { id: "a3", date: "2026-03-01", time: "9:00 AM", hospital: "Reddington Hospital", status: "cancelled" },
-];
-
 const urgencyColor: Record<string, string> = {
   critical: "bg-destructive text-destructive-foreground",
   urgent: "bg-accent text-accent-foreground",
@@ -87,6 +81,17 @@ const DonorDashboard = () => {
     queryFn: async () => {
       const { data } = await axios.get(`${apiURL}/donor/notifications`, { headers });
       return data.data.notifications ?? data.data ?? [];
+    },
+    enabled: !!token,
+    staleTime: 30 * 1000,
+  });
+
+  const { data: appointments = [] } = useQuery({
+    queryKey: ["appointments"],
+    queryFn: async () => {
+      const { data } = await axios.get(`${apiURL}/donor/appointments`, { headers });
+      console.log(data.data.appointments)
+      return data.data.appointments ?? data.data ?? [];
     },
     enabled: !!token,
     staleTime: 30 * 1000,
@@ -284,16 +289,22 @@ const DonorDashboard = () => {
                       <TableHead>Date</TableHead>
                       <TableHead>Time</TableHead>
                       <TableHead>Hospital</TableHead>
+                      <TableHead>Donation Type</TableHead>
                       <TableHead className="text-center">Status</TableHead>
                       <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {appointments.map((a) => (
-                      <TableRow key={a.id}>
-                        <TableCell className="font-medium text-sm whitespace-nowrap">{a.date}</TableCell>
-                        <TableCell className="text-sm">{a.time}</TableCell>
-                        <TableCell className="text-sm">{a.hospital}</TableCell>
+                      <TableRow key={a._id}>
+                        <TableCell className="font-medium text-sm whitespace-nowrap">
+                          {new Date(a.scheduledAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {new Date(a.scheduledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </TableCell>
+                        <TableCell className="text-sm">{a?.hospitalId?.institutionName}</TableCell>
+                        <TableCell className="text-sm">{a?.donationType}</TableCell>
                         <TableCell className="text-center">
                           <Badge className={`${statusColor[a.status]} text-xs capitalize`}>{a.status}</Badge>
                         </TableCell>

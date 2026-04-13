@@ -14,7 +14,7 @@ export const HospitalDropdown = ({ value, onChange }) => {
                 "Content-Type": "application/json",
             },
         });
-        console.log(res.data.data.hospitals);
+        // console.log(res.data.data.hospitals);
         return res.data.data.hospitals;
     };
 

@@ -9,10 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 const DonorNewAppointment = () => {
+  const apiURL = import.meta.env.VITE_REACT_APP_BASE_URL;
+  const token = localStorage.getItem("userToken");
   const navigate = useNavigate();
   const { toast } = useToast();
   const [hospitalId, setHospitalId] = useState("");
@@ -21,14 +24,41 @@ const DonorNewAppointment = () => {
     date: "",
     time: "",
     bloodGroup: "O+",
+    donationType: "whole_blood",
     notes: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: POST to appointment endpoint with { hospitalId, selectedHospital, ...form }
-    toast({ title: "Appointment booked!", description: `Your appointment at ${selectedHospital} has been scheduled.` });
-    navigate("/dashboard");
+
+    // Build ISO scheduledAt from separate date + time fields
+    const scheduledAt = new Date(`${form.date}T${form.time}:00.000Z`).toISOString();
+
+    const payload = {
+      hospitalId,
+      scheduledAt,
+      donationType: form.donationType,
+      bloodType: form.bloodGroup,
+      notes: form.notes,
+    };
+
+    try {
+      await axios.post(`${apiURL}/donor/appointments`, payload, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+      toast({
+        title: "Appointment booked!",
+        description: `Your appointment at ${selectedHospital} has been scheduled.`,
+      });
+      navigate("/dashboard");
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Booking failed",
+        description: error?.response?.data?.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
